@@ -30,6 +30,11 @@ var readOnlyAllowlist = map[string]bool{
 	"classes show":     true,
 	"classwork":        true,
 	"classwork list":   true,
+	"materials":        true,
+	"materials list":   true,
+	// fetch writes only to a local directory the operator named; it changes no
+	// Classroom state.
+	"materials fetch": true,
 	"stream":           true,
 	"stream list":      true,
 	"submissions":      true,

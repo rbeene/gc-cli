@@ -55,6 +55,7 @@ func NewRootCmd(app *App) *cobra.Command {
 		newClassesCmd(app),
 		newStreamCmd(app),
 		newClassworkCmd(app),
+		newMaterialsCmd(app),
 		newSubmissionsCmd(app),
 		newPeopleCmd(app),
 		newGradesCmd(app),

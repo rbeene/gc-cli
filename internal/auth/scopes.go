@@ -28,6 +28,12 @@ const (
 	ScopeCourseWorkMaterialsReadonly = "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly"
 	ScopeCourseWorkMaterials         = "https://www.googleapis.com/auth/classroom.courseworkmaterials"
 	ScopeDriveFile                   = "https://www.googleapis.com/auth/drive.file"
+	// ScopeDriveReadonly is required to read an attachment a teacher shared with
+	// this account. drive.file only reaches files this app created, so it cannot
+	// fetch coursework attachments. This scope is broad — it covers the whole
+	// Drive — so it is deliberately kept out of both default sets and requested
+	// only by the command that downloads attachments.
+	ScopeDriveReadonly = "https://www.googleapis.com/auth/drive.readonly"
 )
 
 // DefaultReadScopes is deliberately narrower than the set of readonly scopes the

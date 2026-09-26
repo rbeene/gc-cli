@@ -87,11 +87,41 @@ never granted, so the command 403'd for exactly the users most likely to run it.
 Errors were printed twice — once by `app.Printer`, once by cobra — which put
 non-JSON text on the `--json` stream. `SilenceErrors` is now set.
 
-## Known limitation, not a defect
+## Upstream limitation, closed on this fork
 
-**This tool cannot download an attached worksheet.** `internal/drive/client.go`
-has no download or export call at all; `GetFile` returns metadata only
-(`id,name,mimeType,webViewLink`). The only Drive scope requested is `drive.file`,
-which by design reaches only files the app itself created. So the tool can tell
+**Upstream could not download an attached worksheet.** `internal/drive/client.go`
+had no download or export call at all; `GetFile` returned metadata only
+(`id,name,mimeType,webViewLink`). The only Drive scope requested was `drive.file`,
+which by design reaches only files the app itself created. So upstream could tell
 you an assignment exists, when it is due and where its attachment lives — it
-cannot fetch the attachment's bytes.
+could not fetch the attachment's bytes.
+
+This fork adds that, because fetching the attached homework PDF is the entire
+point of adopting the tool:
+
+- `internal/drive/download.go` — `DownloadFile` streams a binary attachment
+  verbatim and exports a Google-native Doc/Slides/Sheet/Drawing to PDF. Folders,
+  shortcuts and Google Forms have no byte stream, so they return
+  `ErrNotDownloadable` and are reported and skipped rather than failing the run.
+- `internal/cli/materials.go` — `gc materials list` enumerates every attachment
+  per assignment with its kind, and `gc materials fetch --out DIR` writes the
+  Drive-backed ones to disk, one subdirectory per assignment.
+- Attachment names are teacher-authored free text that routinely contains
+  slashes, so `SafeFileName` reduces every name to a single path element. A
+  property test asserts that traversal inputs (`../../etc/passwd`, `..`,
+  absolute paths, NUL bytes) cannot escape the destination directory.
+- Both new commands are classified read-only in the `GC_ALLOW_WRITES` gate:
+  `fetch` writes only to the local directory the operator named and changes no
+  Classroom state.
+
+### The scope cost of this, stated plainly
+
+Downloading a teacher's attachment requires `drive.readonly`, which grants read
+access to **the entire Drive of the authorizing account**, not just coursework
+attachments. Google offers no narrower scope for "files other people shared with
+me": `drive.file` is app-created-only, and there is no coursework-attachment
+scope. That is a real privilege increase over the rest of this fork's read path.
+
+It is therefore **not** added to `DefaultReadScopes`. Only `gc materials fetch`
+requests it, so `auth login` and every other read command continue to authorize
+without it, and the broad grant only happens if and when someone downloads.

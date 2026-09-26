@@ -14,6 +14,7 @@ import (
 type DriveClient interface {
 	UploadFile(ctx context.Context, path string) (*gdrive.File, error)
 	GetFile(ctx context.Context, fileID string) (*gdrive.File, error)
+	DownloadFile(ctx context.Context, fileID, destDir string) (*DownloadResult, error)
 }
 
 type Client struct {
