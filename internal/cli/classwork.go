@@ -47,7 +47,10 @@ func newClassworkListCmd(app *App) *cobra.Command {
 				return err
 			}
 			ctx := ctx(cmd)
-			client, err := app.ClassroomClient(ctx, []string{auth.ScopeCourseWorkStudentsReadonly})
+			// Listing coursework only needs the caller's own view. Upstream
+			// demanded classroom.coursework.students.readonly, a teacher scope a
+			// student account is never granted, so this call 403'd for students.
+			client, err := app.ClassroomClient(ctx, []string{auth.ScopeCourseWorkMeReadonly})
 			if err != nil {
 				return err
 			}
