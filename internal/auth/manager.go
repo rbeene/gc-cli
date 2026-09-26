@@ -206,9 +206,10 @@ func (m *Manager) Login(ctx context.Context, req LoginRequest) (*LoginResult, er
 		if cfg.OAuthClientID == "" {
 			cfg.OAuthClientID = clientID
 		}
-		if cfg.OAuthClientSecret == "" && clientSecret != "" {
-			cfg.OAuthClientSecret = clientSecret
-		}
+		// The client secret is deliberately not copied into config.json here.
+		// Upstream persisted a secret supplied via GC_OAUTH_CLIENT_SECRET to disk
+		// in plaintext on first login, silently widening where the credential
+		// lives. Persisting it stays an explicit choice (--client-secret).
 		cfg.ActiveProfile = profileName
 		profile := cfg.EnsureProfile(profileName)
 		if email != "" {
