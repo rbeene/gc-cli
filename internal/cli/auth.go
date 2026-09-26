@@ -33,7 +33,7 @@ func newAuthLoginCmd(app *App) *cobra.Command {
 		Use:     "login",
 		Aliases: []string{"signin"},
 		Short:   "Authenticate a profile",
-		Example: "  gc auth login\n  gc auth login -p teacher --scopes classroom.courses.readonly,classroom.rosters.readonly",
+		Example: "  gc auth login\n  gc auth login -p student --scopes classroom.courses.readonly,classroom.coursework.me.readonly",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			if ctx == nil {
@@ -53,7 +53,9 @@ func newAuthLoginCmd(app *App) *cobra.Command {
 					return err
 				}
 			}
-			scopes := parseCSV(scopesRaw)
+			// Short names are expanded to full scope URLs; Google rejects the
+			// entire request with invalid_scope if a bare name reaches it.
+			scopes := auth.ExpandScopes(parseCSV(scopesRaw))
 			if len(scopes) == 0 {
 				scopes = auth.DefaultReadScopes
 			}
