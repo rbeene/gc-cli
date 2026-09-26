@@ -38,10 +38,15 @@ func NewRootCmd(app *App) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			app.SetJSONOutput(jsonOutput)
+			return guardReadOnly(cmd)
 		},
 		SilenceUsage: true,
+		// Execute already renders errors through app.Printer, which is the only
+		// path that honours --json. Letting cobra print them too emitted every
+		// error twice and put non-JSON text on the JSON stream.
+		SilenceErrors: true,
 	}
 	cmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Output machine-readable JSON")
 
