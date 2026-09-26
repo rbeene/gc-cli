@@ -10,3 +10,6 @@ gcp.json
 .idea
 .vscode
 .DS_Store
+
+# locally built binary
+/gc
